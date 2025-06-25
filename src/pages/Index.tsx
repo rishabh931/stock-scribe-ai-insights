@@ -8,7 +8,7 @@ import { TrendingUp, BarChart3, DollarSign } from 'lucide-react';
 const Index = () => {
   const [selectedStock, setSelectedStock] = useState<string>('');
   const [financialData, setFinancialData] = useState<any>(null);
-  const [aiInsights, setAiInsights] = useState<string>('');
+  const [aiInsights, setAiInsights] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
 
   return (
