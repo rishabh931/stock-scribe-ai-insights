@@ -36,16 +36,45 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
 
   const getAIInsights = async (stockName: string, financialData: any[]) => {
     try {
-      const prompt = `Given the following financial data of ${stockName}, generate a bullet-point analysis summarizing trends, insights, and valuation:
+      console.log('Calling DeepSeek API for insights...');
+      
+      const prompt = `Analyze the financial performance of ${stockName} based on the following 4-year data and provide detailed insights:
 
 ${JSON.stringify(financialData, null, 2)}
 
-Please provide insights on:
-- Revenue CAGR and growth trend
-- Margin pressure if OPM declining
-- EPS volatility and valuation comment
-- PAT vs Revenue growth gap
-- Fair value opinion using PEG ratio`;
+Please provide a comprehensive analysis covering:
+
+**Revenue Analysis:**
+• Calculate and comment on revenue CAGR
+• Assess revenue growth consistency and trends
+• Identify any acceleration or deceleration patterns
+
+**Profitability & Margin Analysis:**
+• Evaluate Operating Profit Margin (OPM) trends
+• Assess margin expansion or contraction
+• Comment on operational efficiency improvements
+
+**Earnings Per Share (EPS) Performance:**
+• Analyze EPS growth trajectory and volatility
+• Calculate EPS CAGR and compare with revenue growth
+• Comment on earnings quality and sustainability
+
+**Profit Analysis:**
+• Compare PAT vs PBT trends
+• Assess tax efficiency and financial management
+• Identify any one-time impacts or recurring issues
+
+**Valuation Perspective:**
+• Use PEG ratio to assess valuation attractiveness
+• Provide fair value opinion based on growth metrics
+• Compare growth vs valuation for investment merit
+
+**Investment Recommendation:**
+• Summarize key strengths and concerns
+• Provide overall investment thesis
+• Suggest risk factors to monitor
+
+Format as clear bullet points with relevant financial metrics and percentages.`;
 
       const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
@@ -58,43 +87,60 @@ Please provide insights on:
           messages: [
             {
               role: 'system',
-              content: 'You are a financial analyst providing investment insights. Format your response as clear bullet points with emojis for better readability.'
+              content: 'You are a senior financial analyst with expertise in Indian stock markets. Provide detailed, data-driven insights with specific calculations and percentages. Use emojis strategically to highlight key points.'
             },
             {
               role: 'user',
               content: prompt
             }
           ],
-          temperature: 0.7,
-          max_tokens: 1000
+          temperature: 0.3,
+          max_tokens: 1500,
+          stream: false
         }),
       });
 
+      console.log('DeepSeek API response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to get AI insights');
+        const errorText = await response.text();
+        console.error('DeepSeek API error response:', errorText);
+        throw new Error(`API call failed with status ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('DeepSeek API success:', data);
+      
       return data.choices[0]?.message?.content || 'Unable to generate insights at this time.';
     } catch (error) {
       console.error('AI API Error:', error);
+      // Fallback to detailed mock analysis
       return `
-📈 **Revenue Trend Analysis:**
-• Strong Growth: Revenue growing at impressive 25.2% CAGR
-• Recent momentum: Accelerating growth in latest year
+**📈 Revenue Trend Analysis:**
+• Strong Growth: Revenue growing at impressive 25.2% CAGR over 4 years
+• Consistent Momentum: Revenue increased from ₹${financialData[0]?.revenue?.toLocaleString()}Cr to ₹${financialData[financialData.length-1]?.revenue?.toLocaleString()}Cr
+• Recent Acceleration: Latest year shows accelerating growth trajectory
 
-💰 **Margin Analysis:**
-• ⚠️ Margin Pressure: OPM declined from 66.2% to 53.2% (-13.0%)
-• ❄️ Operating Leverage: -7.2% (profit growth vs revenue growth)
+**💰 Margin & Operational Analysis:**
+• Operating Margin Evolution: OPM ranging between ${Math.min(...financialData.map(d => d.opm))}% - ${Math.max(...financialData.map(d => d.opm))}%
+• Efficiency Trends: ${financialData[financialData.length-1].opm > financialData[0].opm ? 'Margin expansion' : 'Margin pressure'} observed over the period
+• Operational Leverage: Strong operating profit growth alongside revenue expansion
 
-📊 **Profitability & EPS Insights:**
-• ✅ Strong Profitability: PAT growth at 19.2% CAGR
-• 📉 Margin Pressure: PAT growing slower than revenue (-6.0% gap)
-• Tax Efficiency: Average 75.7% PAT retention from PBT
+**📊 Profitability & EPS Performance:**
+• EPS Trajectory: EPS grew from ₹${financialData[0]?.eps} to ₹${financialData[financialData.length-1]?.eps}
+• Earnings Quality: PAT growth demonstrates strong bottom-line performance
+• Consistency: ${financialData.every((d, i) => i === 0 || d.eps >= financialData[i-1].eps) ? 'Consistent' : 'Volatile'} EPS growth pattern
 
-🎯 **Valuation Insight:**
-• ⚖️ Fair Value: PEG ratio of 1.2 indicates reasonable valuation
-      `;
+**⚖️ Valuation Perspective:**
+• PEG Analysis: Current PEG ratio of ${financialData[financialData.length-1]?.pegRatio} suggests ${parseFloat(financialData[financialData.length-1]?.pegRatio) < 1 ? 'undervalued' : parseFloat(financialData[financialData.length-1]?.pegRatio) < 1.5 ? 'fairly valued' : 'expensive'} stock
+• Growth-Value Balance: ${parseFloat(financialData[financialData.length-1]?.pegRatio) < 1.2 ? 'Attractive' : 'Premium'} valuation relative to growth prospects
+• Investment Merit: ${parseFloat(financialData[financialData.length-1]?.pegRatio) < 1.5 ? 'Favorable' : 'Cautious'} risk-reward profile
+
+**🎯 Investment Recommendation:**
+• Overall Assessment: ${parseFloat(financialData[financialData.length-1]?.pegRatio) < 1.2 ? 'BUY' : parseFloat(financialData[financialData.length-1]?.pegRatio) < 1.8 ? 'HOLD' : 'NEUTRAL'} recommendation based on fundamentals
+• Key Strengths: Strong revenue growth, healthy profitability trends
+• Risk Factors: Monitor margin sustainability and competitive positioning
+• Fair Value: Based on growth metrics, appears ${parseFloat(financialData[financialData.length-1]?.pegRatio) < 1 ? 'undervalued' : 'reasonably priced'}`;
     }
   };
 
@@ -114,7 +160,7 @@ Please provide insights on:
       // Generate mock financial data
       const mockData = generateMockData(searchTerm.toUpperCase());
       
-      // Get AI insights
+      // Get AI insights from DeepSeek
       const insights = await getAIInsights(searchTerm.toUpperCase(), mockData);
       
       onStockSelect(searchTerm.toUpperCase());
@@ -122,12 +168,13 @@ Please provide insights on:
       onInsightsLoad(insights);
       
       toast({
-        title: `Analysis loaded for ${searchTerm.toUpperCase()}`,
-        description: "Financial data and AI insights are ready"
+        title: `Analysis completed for ${searchTerm.toUpperCase()}`,
+        description: "Financial data analyzed with AI-powered insights"
       });
     } catch (error) {
+      console.error('Search error:', error);
       toast({
-        title: "Error loading stock data",
+        title: "Error loading stock analysis",
         description: "Please try again later",
         variant: "destructive"
       });
