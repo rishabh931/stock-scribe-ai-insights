@@ -10,7 +10,7 @@ interface RawDataTableProps {
 export const RawDataTable = ({ data, columns, title }: RawDataTableProps) => {
   const formatValue = (key: string, value: any) => {
     if (key === 'year') return value;
-    if (key === 'opm' || key === 'roe' || key === 'roce') return `${value}%`;
+    if (key === 'opm' || key === 'roe' || key === 'roce' || key === 'epsGrowth') return `${value}%`;
     if (key === 'pegRatio') return value;
     if (key === 'eps') return `₹${value}`;
     return `₹${value.toLocaleString()}Cr`;
@@ -25,6 +25,7 @@ export const RawDataTable = ({ data, columns, title }: RawDataTableProps) => {
       pbt: 'PBT (Cr)',
       pat: 'PAT (Cr)',
       eps: 'EPS',
+      epsGrowth: 'EPS Growth %',
       pegRatio: 'PEG Ratio',
       roe: 'ROE %',
       roce: 'ROCE %'
