@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RevenueChart } from '@/components/RevenueChart';
@@ -25,7 +24,7 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${stockName}_Financial_Analysis_Report_5Years.html`;
+      link.download = `${stockName}_Financial_Analysis_Report_5Years_2021-2025.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -33,7 +32,7 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
       
       toast({
         title: "Report Downloaded",
-        description: `${stockName} 5-year analysis report has been downloaded`
+        description: `${stockName} 5-year analysis report (2021-2025) has been downloaded`
       });
     } catch (error) {
       toast({
@@ -55,7 +54,7 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
     <!DOCTYPE html>
     <html>
     <head>
-        <title>${stockName} Financial Analysis Report (5 Years)</title>
+        <title>${stockName} Financial Analysis Report (5 Years: 2021-2025)</title>
         <style>
             body { font-family: Arial, sans-serif; margin: 40px; }
             .header { text-align: center; margin-bottom: 40px; }
@@ -70,29 +69,30 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
     </head>
     <body>
         <div class="header">
-            <h1>${stockName} Financial Analysis Report (2020-2024)</h1>
+            <h1>${stockName} Comprehensive Financial Analysis Report (2021-2025)</h1>
             <p>Generated on ${new Date().toLocaleDateString()}</p>
+            <p><strong>5-Year Performance Overview with Latest Data Including 2025</strong></p>
         </div>
         
         <div class="metrics">
             <div class="metric-card">
-                <h3>Revenue</h3>
+                <h3>Latest Revenue (2025)</h3>
                 <p>₹${latestData.revenue.toLocaleString()}Cr</p>
             </div>
             <div class="metric-card">
-                <h3>Operating Margin</h3>
+                <h3>Operating Margin (2025)</h3>
                 <p>${latestData.opm}%</p>
             </div>
             <div class="metric-card">
-                <h3>EPS</h3>
+                <h3>EPS (2025)</h3>
                 <p>₹${latestData.eps}</p>
             </div>
             <div class="metric-card">
-                <h3>ROE</h3>
+                <h3>ROE (2025)</h3>
                 <p>${latestData.roe}%</p>
             </div>
             <div class="metric-card">
-                <h3>ROCE</h3>
+                <h3>ROCE (2025)</h3>
                 <p>${latestData.roce}%</p>
             </div>
             <div class="metric-card">
@@ -104,13 +104,13 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
                 <p>${profitCAGR}%</p>
             </div>
             <div class="metric-card">
-                <h3>PEG Ratio</h3>
+                <h3>PEG Ratio (2025)</h3>
                 <p>${latestData.pegRatio}</p>
             </div>
         </div>
 
         <div class="section">
-            <h2>Financial Data (5 Years: 2020-2024)</h2>
+            <h2>Financial Data (5 Years: 2021-2025)</h2>
             <table>
                 <thead>
                     <tr>
@@ -144,18 +144,18 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
         </div>
 
         <div class="section">
-            <h2>Detailed AI-Driven Analysis</h2>
-            <h3>Revenue Analysis</h3>
+            <h2>Comprehensive AI-Driven Analysis (2021-2025)</h2>
+            <h3>Revenue Analysis & Key Insights</h3>
             <p>${aiInsights?.revenue || 'Analysis not available'}</p>
             
-            <h3>Profitability Analysis</h3>
+            <h3>Profitability Analysis & Key Insights</h3>
             <p>${aiInsights?.profitability || 'Analysis not available'}</p>
             
-            <h3>EPS Analysis</h3>
+            <h3>EPS Performance & Key Insights</h3>
             <p>${aiInsights?.eps || 'Analysis not available'}</p>
             
             <div class="sentiment">
-                <h3>Sentiment Analysis</h3>
+                <h3>Investment Sentiment Analysis & Key Insights</h3>
                 <p>${aiInsights?.sentiment || 'Sentiment analysis not available'}</p>
             </div>
         </div>
@@ -169,7 +169,7 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
           <p className="text-lg text-slate-600">Analyzing {stockName}...</p>
-          <p className="text-sm text-slate-500">Fetching 5-year financial data and generating detailed AI insights</p>
+          <p className="text-sm text-slate-500">Fetching 5-year financial data (2021-2025) and generating comprehensive AI insights</p>
         </div>
       </div>
     );
@@ -189,12 +189,12 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-slate-800">{stockName} Analysis (5 Years)</h2>
-          <p className="text-slate-600">Comprehensive financial analysis with detailed AI insights (2020-2024)</p>
+          <h2 className="text-3xl font-bold text-slate-800">{stockName} Analysis (2021-2025)</h2>
+          <p className="text-slate-600">Comprehensive financial analysis with detailed AI insights including latest 2025 data</p>
         </div>
         <Button onClick={handleDownloadReport} className="bg-green-600 hover:bg-green-700">
           <Download className="h-4 w-4 mr-2" />
-          Download 5Y Report
+          Download 5Y Report (2021-2025)
         </Button>
       </div>
 
@@ -205,7 +205,7 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
             <div className="text-2xl font-bold text-blue-700">
               ₹{latestData.revenue.toLocaleString()}Cr
             </div>
-            <div className="text-sm text-blue-600">Latest Revenue</div>
+            <div className="text-sm text-blue-600">Latest Revenue (2025)</div>
           </CardContent>
         </Card>
         
@@ -278,34 +278,34 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
         <Card className="shadow-lg border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              📊 Revenue & Operating Profit Analysis (5 Years)
+              📊 Revenue & Operating Profit Analysis (2021-2025)
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <RawDataTable 
               data={financialData} 
               columns={['year', 'revenue', 'operatingProfit', 'opm']}
-              title="Revenue Data (2020-2024)"
+              title="Revenue Data (2021-2025)"
             />
             <RevenueChart data={financialData} />
-            <AIInsights insights={aiInsights?.revenue} stockName={stockName} sectionTitle="Detailed Revenue Analysis" />
+            <AIInsights insights={aiInsights?.revenue} stockName={stockName} sectionTitle="Detailed Revenue Analysis & Key Insights" />
           </CardContent>
         </Card>
 
         <Card className="shadow-lg border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              💰 Profitability Analysis (5 Years)
+              💰 Profitability Analysis (2021-2025)
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <RawDataTable 
               data={financialData} 
               columns={['year', 'pbt', 'pat']}
-              title="Profitability Data (2020-2024)"
+              title="Profitability Data (2021-2025)"
             />
             <ProfitabilityChart data={financialData} />
-            <AIInsights insights={aiInsights?.profitability} stockName={stockName} sectionTitle="Detailed Profitability Analysis" />
+            <AIInsights insights={aiInsights?.profitability} stockName={stockName} sectionTitle="Detailed Profitability Analysis & Key Insights" />
           </CardContent>
         </Card>
       </div>
@@ -313,17 +313,17 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
       <Card className="shadow-lg border-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            📈 EPS Performance Trend (5 Years)
+            📈 EPS Performance Trend (2021-2025)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <RawDataTable 
             data={financialData} 
             columns={['year', 'eps', 'epsGrowth', 'pegRatio']}
-            title="EPS Data with Growth Rate (2020-2024)"
+            title="EPS Data with Growth Rate (2021-2025)"
           />
           <EPSChart data={financialData} />
-          <AIInsights insights={aiInsights?.eps} stockName={stockName} sectionTitle="Detailed EPS Analysis" />
+          <AIInsights insights={aiInsights?.eps} stockName={stockName} sectionTitle="Detailed EPS Analysis & Key Insights" />
         </CardContent>
       </Card>
 
@@ -331,11 +331,11 @@ export const FinancialDashboard = ({ stockName, financialData, aiInsights, isLoa
       <Card className="shadow-lg border-0 bg-gradient-to-r from-slate-50 to-blue-50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            🎯 Investment Sentiment Analysis
+            🎯 Investment Sentiment Analysis & Key Insights
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <AIInsights insights={aiInsights?.sentiment} stockName={stockName} sectionTitle="Positive & Negative Sentiment Analysis" />
+          <AIInsights insights={aiInsights?.sentiment} stockName={stockName} sectionTitle="Comprehensive Investment Analysis & Key Insights" />
         </CardContent>
       </Card>
     </div>
