@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -86,7 +87,7 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-r1:free',
+        model: 'deepseek/deepseek-r1',
         messages: [
           {
             role: 'system',
@@ -103,11 +104,16 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
       }),
     });
 
+    console.log('API Response Status:', response.status);
+    
     if (!response.ok) {
-      throw new Error(`API call failed with status ${response.status}`);
+      const errorText = await response.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`API call failed with status ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('API Response Data:', data);
     return data.choices[0]?.message?.content || generateSectionFallback(section, financialData);
   };
 
