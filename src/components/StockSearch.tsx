@@ -47,7 +47,7 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
 
   const getAIInsights = async (stockName: string, financialData: any[]) => {
     try {
-      console.log('Calling DeepSeek API for insights...');
+      console.log('Calling OpenRouter API for insights...');
       
       const revenueInsights = await getInsightForSection(stockName, financialData, 'revenue');
       const profitabilityInsights = await getInsightForSection(stockName, financialData, 'profitability');
@@ -77,14 +77,16 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
       sentiment: `Based on ${stockName}'s comprehensive 5-year financial performance (2020-2024):\n${JSON.stringify(financialData, null, 2)}\n\nProvide detailed sentiment analysis covering:\n\n**POSITIVE FACTORS & BULLISH INDICATORS:**\n• Revenue growth momentum and market expansion opportunities\n• Margin improvement trends and operational efficiency gains\n• Strong return ratios (ROE/ROCE) and capital allocation effectiveness\n• Earnings quality, consistency, and predictability factors\n• Competitive moat strengthening and market position\n• Management execution track record and strategic initiatives\n• Balance sheet strength and financial flexibility\n• Industry tailwinds and secular growth drivers\n• Valuation attractiveness at current levels\n• Dividend sustainability and shareholder-friendly policies\n\n**NEGATIVE FACTORS & BEARISH CONCERNS:**\n• Revenue growth deceleration or cyclical headwinds\n• Margin pressure from competition or cost inflation\n• Deteriorating return ratios or capital misallocation\n• Earnings volatility or one-time exceptional items\n• Market share loss or competitive threats\n• Management credibility issues or strategic missteps\n• Balance sheet concerns or liquidity constraints\n• Industry disruption or regulatory challenges\n• Overvaluation concerns based on growth prospects\n• Dividend cut risks or poor capital allocation\n\n**OVERALL INVESTMENT SENTIMENT:**\nProvide a clear BULLISH/NEUTRAL/BEARISH recommendation with:\n• Risk-reward assessment and investment horizon\n• Key catalysts and risk factors to monitor\n• Price target range and entry/exit levels\n• Portfolio allocation suggestions\n\nUse specific data points, ratios, and calculations from the financial data to support your analysis.`
     };
 
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer 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',
+        'HTTP-Referer': 'https://indian-stock-analyzer.lovable.app',
+        'X-Title': 'Indian Stock Analyzer',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'deepseek/deepseek-r1:free',
         messages: [
           {
             role: 'system',
