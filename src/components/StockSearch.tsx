@@ -80,7 +80,7 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer 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',
+        'Authorization': 'Bearer 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',
         'HTTP-Referer': 'https://indian-stock-analyzer.lovable.app',
         'X-Title': 'Indian Stock Analyzer',
         'Content-Type': 'application/json',
