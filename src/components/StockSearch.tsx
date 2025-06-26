@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { getStoredApiKey } from './ApiKeyManager';
 
 interface StockSearchProps {
   onStockSelect: (stock: string) => void;
@@ -46,13 +47,24 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
   };
 
   const getAIInsights = async (stockName: string, financialData: any[]) => {
+    const apiKey = getStoredApiKey();
+    
+    if (!apiKey) {
+      toast({
+        title: "API key required",
+        description: "Please configure your OpenRouter API key first",
+        variant: "destructive"
+      });
+      return generateFallbackInsights(stockName, financialData);
+    }
+
     try {
       console.log('Calling OpenRouter API for insights...');
       
-      const revenueInsights = await getInsightForSection(stockName, financialData, 'revenue');
-      const profitabilityInsights = await getInsightForSection(stockName, financialData, 'profitability');
-      const epsInsights = await getInsightForSection(stockName, financialData, 'eps');
-      const sentimentInsights = await getInsightForSection(stockName, financialData, 'sentiment');
+      const revenueInsights = await getInsightForSection(stockName, financialData, 'revenue', apiKey);
+      const profitabilityInsights = await getInsightForSection(stockName, financialData, 'profitability', apiKey);
+      const epsInsights = await getInsightForSection(stockName, financialData, 'eps', apiKey);
+      const sentimentInsights = await getInsightForSection(stockName, financialData, 'sentiment', apiKey);
       
       return {
         revenue: revenueInsights,
@@ -66,7 +78,7 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
     }
   };
 
-  const getInsightForSection = async (stockName: string, financialData: any[], section: string) => {
+  const getInsightForSection = async (stockName: string, financialData: any[], section: string, apiKey: string) => {
     const prompts = {
       revenue: `Analyze ${stockName}'s Revenue & Operating Performance over 5 years (2021-2025):\n${JSON.stringify(financialData, null, 2)}\n\nProvide comprehensive Key Insights in bullet point format with detailed analysis:\n\n• **Revenue Acceleration:** Calculate year-over-year growth rates for each year, identify growth trajectory patterns, acceleration or deceleration trends, and provide specific percentage figures with context\n\n• **Operating Leverage Analysis:** Detailed OPM evolution with basis points expansion/contraction, operational efficiency metrics, cost structure optimization, and scalability assessment\n\n• **Market Position & Competitive Dynamics:** Market share trends, competitive positioning analysis, industry growth vs company performance, and strategic advantages\n\n• **Business Model Scalability:** Asset-light vs asset-heavy analysis, working capital management, operational flexibility, and expansion capabilities\n\n• **Revenue Quality & Sustainability:** Revenue stream diversification, client concentration analysis, recurring vs non-recurring revenue, seasonal patterns, and cyclical trends\n\n• **Growth Catalysts:** Key drivers enabling revenue expansion, new product launches, market expansion, technological adoption, and strategic initiatives\n\n• **Risk Factors:** Revenue headwinds, competitive threats, regulatory challenges, market saturation risks, and external dependencies\n\nFormat with clear bullet points, include specific numbers, percentages, and actionable insights.`,
       
@@ -80,7 +92,7 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer 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',
+        'Authorization': `Bearer ${apiKey}`,
         'HTTP-Referer': 'https://indian-stock-analyzer.lovable.app',
         'X-Title': 'Indian Stock Analyzer',
         'Content-Type': 'application/json',

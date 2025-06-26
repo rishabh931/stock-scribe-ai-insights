@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { StockSearch } from '@/components/StockSearch';
 import { FinancialDashboard } from '@/components/FinancialDashboard';
+import { ApiKeyManager } from '@/components/ApiKeyManager';
 import { Card } from '@/components/ui/card';
 import { TrendingUp, BarChart3, DollarSign } from 'lucide-react';
 
@@ -28,6 +29,9 @@ const Index = () => {
             Get AI-powered insights and comprehensive financial analysis for Indian stocks
           </p>
         </div>
+
+        {/* API Key Manager */}
+        <ApiKeyManager />
 
         {/* Search Section */}
         <Card className="mb-8 p-6 shadow-lg border-0 bg-white/70 backdrop-blur-sm">
