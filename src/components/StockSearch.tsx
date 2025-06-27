@@ -53,11 +53,12 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
     const model = getStoredModel();
     
     if (!apiKey) {
+      console.log('No API key found, using detailed local analysis...');
       return generateLocalInsights(stockName, financialData);
     }
 
     try {
-      console.log('Calling OpenRouter API for insights...');
+      console.log('Calling OpenRouter API for concise insights...');
       
       const revenueInsights = await getInsightForSection(stockName, financialData, 'revenue', apiKey, model);
       const profitabilityInsights = await getInsightForSection(stockName, financialData, 'profitability', apiKey, model);
@@ -71,52 +72,48 @@ export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadi
         sentiment: sentimentInsights
       };
     } catch (error) {
-      console.error('AI API Error:', error);
+      console.error('AI API Error, falling back to detailed local analysis:', error);
       return generateLocalInsights(stockName, financialData);
     }
   };
 
   const getInsightForSection = async (stockName: string, financialData: any[], section: string, apiKey: string, model: string) => {
     const prompts = {
-      revenue: `Analyze ${stockName}'s revenue performance (2021-2025): ${JSON.stringify(financialData, null, 2)}
+      revenue: `Analyze ${stockName}'s revenue (2021-2025): ${JSON.stringify(financialData, null, 2)}
 
-Provide concise insights:
-• Revenue growth trajectory and CAGR
-• Operating margin trends and efficiency
-• Market position assessment
-• Key growth drivers and risks
+Provide brief insights:
+• Revenue CAGR and growth quality
+• Operating margin trends
+• Key drivers
 
-Keep response under 150 words with bullet points.`,
+Max 100 words.`,
       
       profitability: `Analyze ${stockName}'s profitability (2021-2025): ${JSON.stringify(financialData, null, 2)}
 
-Provide concise insights:
-• Profit growth and margin expansion
-• ROE/ROCE efficiency metrics
-• Earnings quality assessment
-• Cost management effectiveness
+Provide brief insights:
+• Profit growth and efficiency
+• ROE/ROCE metrics
+• Margin evolution
 
-Keep response under 150 words with bullet points.`,
+Max 100 words.`,
       
-      eps: `Analyze ${stockName}'s EPS performance (2021-2025): ${JSON.stringify(financialData, null, 2)}
+      eps: `Analyze ${stockName}'s EPS (2021-2025): ${JSON.stringify(financialData, null, 2)}
 
-Provide concise insights:
-• EPS growth trajectory and consistency
-• Valuation metrics (PEG ratio analysis)
-• Shareholder value creation
-• Forward outlook indicators
+Provide brief insights:
+• EPS growth trajectory
+• Valuation (PEG analysis)
+• Shareholder value
 
-Keep response under 150 words with bullet points.`,
+Max 100 words.`,
       
-      sentiment: `Investment sentiment for ${stockName} based on 5-year data (2021-2025): ${JSON.stringify(financialData, null, 2)}
+      sentiment: `Investment outlook for ${stockName} (2021-2025): ${JSON.stringify(financialData, null, 2)}
 
-Provide concise analysis:
-• Overall investment recommendation (BULLISH/NEUTRAL/BEARISH)
-• Key strengths and catalysts
-• Main risks and challenges
-• Target investor profile
+Provide brief analysis:
+• Recommendation (BUY/HOLD/AVOID)
+• Key strengths/risks
+• Investment horizon
 
-Keep response under 200 words with clear recommendation.`
+Max 120 words.`
     };
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -132,7 +129,7 @@ Keep response under 200 words with clear recommendation.`
         messages: [
           {
             role: 'system',
-            content: 'You are a concise equity analyst. Provide brief, actionable insights with specific numbers. Use bullet points and keep responses under word limits specified.'
+            content: 'You are a concise equity analyst. Provide brief, actionable insights with specific numbers. Use bullet points and keep responses under word limits.'
           },
           {
             role: 'user',
@@ -140,7 +137,7 @@ Keep response under 200 words with clear recommendation.`
           }
         ],
         temperature: 0.1,
-        max_tokens: 500,
+        max_tokens: 300,
         stream: false
       }),
     });
@@ -166,16 +163,22 @@ Keep response under 200 words with clear recommendation.`
     onLoadingChange(true);
 
     try {
+      // Data generation remains consistent
       const mockData = generateMockData(searchTerm.toUpperCase());
+      
+      // Only analysis method changes based on API availability
       const insights = await getAIInsights(searchTerm.toUpperCase(), mockData);
       
       onStockSelect(searchTerm.toUpperCase());
       onDataLoad(mockData);
       onInsightsLoad(insights);
       
+      const apiKey = getStoredApiKey();
+      const analysisType = apiKey ? 'AI-powered' : 'Detailed local';
+      
       toast({
-        title: `Analysis completed for ${searchTerm.toUpperCase()}`,
-        description: "5-year financial data analyzed with AI insights (2021-2025)"
+        title: `${analysisType} analysis completed for ${searchTerm.toUpperCase()}`,
+        description: "5-year financial data analyzed (2021-2025)"
       });
     } catch (error) {
       console.error('Search error:', error);
@@ -203,7 +206,9 @@ Keep response under 200 words with clear recommendation.`
     onLoadingChange(true);
 
     try {
+      // Same data generation for consistency
       const mockData = generateMockData(searchTerm.toUpperCase());
+      // Force local detailed analysis
       const insights = generateLocalInsights(searchTerm.toUpperCase(), mockData);
       
       onStockSelect(searchTerm.toUpperCase());
@@ -211,8 +216,8 @@ Keep response under 200 words with clear recommendation.`
       onInsightsLoad(insights);
       
       toast({
-        title: `Quick analysis for ${searchTerm.toUpperCase()}`,
-        description: "Local analysis completed instantly"
+        title: `Detailed local analysis for ${searchTerm.toUpperCase()}`,
+        description: "Comprehensive local analysis completed instantly"
       });
     } catch (error) {
       console.error('Quick analysis error:', error);

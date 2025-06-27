@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Eye, EyeOff, Key, Save, Settings } from 'lucide-react';
+import { Eye, EyeOff, Key, Save, Settings, Code } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const API_KEY_STORAGE_KEY = 'openrouter_api_key';
@@ -15,12 +15,14 @@ const AVAILABLE_MODELS = [
   { value: 'openai/gpt-4o', label: 'GPT-4o' },
   { value: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet' },
   { value: 'meta-llama/llama-3.1-70b-instruct', label: 'Llama 3.1 70B' },
-  { value: 'google/gemini-pro-1.5', label: 'Gemini Pro 1.5' }
+  { value: 'google/gemini-pro-1.5', label: 'Gemini Pro 1.5' },
+  { value: 'custom', label: 'Custom Model' }
 ];
 
 export const ApiKeyManager = () => {
   const [apiKey, setApiKey] = useState('');
   const [selectedModel, setSelectedModel] = useState('deepseek/deepseek-r1');
+  const [customModel, setCustomModel] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [hasKey, setHasKey] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -35,6 +37,11 @@ export const ApiKeyManager = () => {
     }
     if (storedModel) {
       setSelectedModel(storedModel);
+      // If it's a custom model not in the predefined list
+      if (!AVAILABLE_MODELS.find(m => m.value === storedModel)) {
+        setSelectedModel('custom');
+        setCustomModel(storedModel);
+      }
     }
   }, []);
 
@@ -56,13 +63,28 @@ export const ApiKeyManager = () => {
       return;
     }
 
+    const finalModel = selectedModel === 'custom' ? customModel : selectedModel;
+    
+    if (selectedModel === 'custom' && !customModel.trim()) {
+      toast({
+        title: "Please enter a custom model",
+        variant: "destructive"
+      });
+      return;
+    }
+
     localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
-    localStorage.setItem(MODEL_STORAGE_KEY, selectedModel);
+    localStorage.setItem(MODEL_STORAGE_KEY, finalModel);
     setHasKey(true);
     setShowSettings(false);
+    
+    const modelLabel = selectedModel === 'custom' 
+      ? customModel 
+      : AVAILABLE_MODELS.find(m => m.value === selectedModel)?.label;
+    
     toast({
       title: "API key and model saved successfully",
-      description: `Using ${AVAILABLE_MODELS.find(m => m.value === selectedModel)?.label}`
+      description: `Using ${modelLabel}`
     });
   };
 
@@ -70,12 +92,21 @@ export const ApiKeyManager = () => {
     localStorage.removeItem(API_KEY_STORAGE_KEY);
     localStorage.removeItem(MODEL_STORAGE_KEY);
     setApiKey('');
+    setCustomModel('');
     setHasKey(false);
     setShowSettings(false);
     toast({
       title: "API key removed",
       description: "Your API key has been removed from local storage"
     });
+  };
+
+  const getCurrentModelLabel = () => {
+    const storedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+    if (!storedModel) return 'DeepSeek R1 (Recommended)';
+    
+    const predefinedModel = AVAILABLE_MODELS.find(m => m.value === storedModel);
+    return predefinedModel ? predefinedModel.label : storedModel;
   };
 
   return (
@@ -129,6 +160,24 @@ export const ApiKeyManager = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            {selectedModel === 'custom' && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-amber-700 flex items-center gap-1">
+                  <Code className="h-4 w-4" />
+                  Custom Model Code
+                </label>
+                <Input
+                  placeholder="e.g., anthropic/claude-3-opus, openai/gpt-4-turbo"
+                  value={customModel}
+                  onChange={(e) => setCustomModel(e.target.value)}
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-amber-600">
+                  Enter the exact model code from OpenRouter. Visit <a href="https://openrouter.ai/models" target="_blank" rel="noopener noreferrer" className="underline">openrouter.ai/models</a> for available models.
+                </p>
+              </div>
+            )}
             
             <div className="flex gap-2">
               <Button onClick={handleSaveKey} className="bg-amber-600 hover:bg-amber-700">
@@ -146,7 +195,7 @@ export const ApiKeyManager = () => {
       ) : (
         <div className="space-y-3">
           <p className="text-sm text-green-700">
-            ✅ API configured - Model: {AVAILABLE_MODELS.find(m => m.value === selectedModel)?.label}
+            ✅ API configured - Model: {getCurrentModelLabel()}
           </p>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setShowSettings(true)}>
