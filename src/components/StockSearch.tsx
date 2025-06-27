@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,7 @@ import { Search, Loader2, Zap } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { getStoredApiKey, getStoredModel } from './ApiKeyManager';
 import { generateLocalInsights } from '@/utils/localAnalysis';
+import { generateConsistentStockData } from '@/utils/stockDataService';
 
 interface StockSearchProps {
   onStockSelect: (stock: string) => void;
@@ -19,34 +19,6 @@ const SAMPLE_STOCKS = ['TCS', 'RELIANCE', 'INFY', 'HDFC', 'CDSL', 'ITC', 'SBI', 
 export const StockSearch = ({ onStockSelect, onDataLoad, onInsightsLoad, onLoadingChange }: StockSearchProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const generateMockData = (stockName: string) => {
-    const years = ['2021', '2022', '2023', '2024', '2025'];
-    const baseRevenue = Math.floor(Math.random() * 50000) + 10000;
-    
-    return years.map((year, index) => {
-      const revenue = baseRevenue + (index * Math.floor(Math.random() * 5000) + 1000);
-      const eps = Math.floor(Math.random() * 100) + 50 + (index * 10);
-      const prevEps = index > 0 ? (baseRevenue/1000 + ((index-1) * 10) + 50) : eps;
-      const epsGrowth = index > 0 ? Math.round(((eps - prevEps) / prevEps) * 100 * 100) / 100 : 0;
-      
-      return {
-        year,
-        revenue,
-        operatingProfit: Math.floor(revenue * (0.15 + Math.random() * 0.15)),
-        opm: Math.floor(Math.random() * 20) + 10,
-        pbt: Math.floor(revenue * (0.12 + Math.random() * 0.08)),
-        pat: Math.floor(revenue * (0.08 + Math.random() * 0.07)),
-        eps,
-        epsGrowth,
-        pegRatio: (Math.random() * 2 + 0.5).toFixed(1),
-        roe: Math.floor(Math.random() * 25) + 10,
-        roce: Math.floor(Math.random() * 20) + 8,
-        netWorth: Math.floor(revenue * (0.4 + Math.random() * 0.3)),
-        totalAssets: Math.floor(revenue * (0.8 + Math.random() * 0.4))
-      };
-    });
-  };
 
   const getAIInsights = async (stockName: string, financialData: any[]) => {
     const apiKey = getStoredApiKey();
@@ -163,14 +135,14 @@ Max 120 words.`
     onLoadingChange(true);
 
     try {
-      // Data generation remains consistent
-      const mockData = generateMockData(searchTerm.toUpperCase());
+      // Use consistent data generation
+      const consistentData = generateConsistentStockData(searchTerm.toUpperCase());
       
       // Only analysis method changes based on API availability
-      const insights = await getAIInsights(searchTerm.toUpperCase(), mockData);
+      const insights = await getAIInsights(searchTerm.toUpperCase(), consistentData);
       
       onStockSelect(searchTerm.toUpperCase());
-      onDataLoad(mockData);
+      onDataLoad(consistentData);
       onInsightsLoad(insights);
       
       const apiKey = getStoredApiKey();
@@ -206,13 +178,13 @@ Max 120 words.`
     onLoadingChange(true);
 
     try {
-      // Same data generation for consistency
-      const mockData = generateMockData(searchTerm.toUpperCase());
+      // Use consistent data generation
+      const consistentData = generateConsistentStockData(searchTerm.toUpperCase());
       // Force local detailed analysis
-      const insights = generateLocalInsights(searchTerm.toUpperCase(), mockData);
+      const insights = generateLocalInsights(searchTerm.toUpperCase(), consistentData);
       
       onStockSelect(searchTerm.toUpperCase());
-      onDataLoad(mockData);
+      onDataLoad(consistentData);
       onInsightsLoad(insights);
       
       toast({
